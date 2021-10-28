@@ -1,0 +1,654 @@
+---
+title: "Google Data Analytics Capstone: Bellabeat Fitness Tracker Analytics"
+author: "Nilosree Sengupta"
+date: "28/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Google Data Analytics: Bellabeat Case Study**
+
+### **This is one of the case studies of the : _Google Data Analytics Capstone: Complete a Case Study_**
+
+
+
+
+
+## **1. Ask Phase : ** 
+To identify Business Problem:This Business case study research Analytics is done To get insights regarding the sleep and activity intensity of the people, being a fitness tracker.
+
+
+## **2. Prepare Phase :**  
+The dataset is collected from Kaggle : https://www.kaggle.com/arashnic/fitbit/metadata . It contains 18 csv files. 
+
+
+## **3. Process Phase:** 
+We will explore the data. The 2 main parameters to observwe will be sleep and activity, to track the fitness of the people.
+
+So, Let's  get started!
+
+###  Packages required for Exploring the FitBit Data
+
+##### We’ll be using the tidyverse package as well as the skimr, here, and janitor packages for help with this project.
+
+
+
+###  Loading the CSV files
+Here we’ll create our data frames for review. The data frames I’ll be working with in this review will be creating objects for:
+
+daily_activity,
+daily_calories,
+daily_sleep,
+weight_log_info,
+daily_intensities
+
+
+
+###  Load Libraries
+
+```
+library('tidyverse')
+library('janitor')
+library('skimr')
+library('here')
+library('dplyr')
+library('lubridate')
+library('ggplot2')
+
+```
+
+###  Loading dataframes
+
+```
+daily_activity <- read.csv("dailyActivity_merged.csv")
+daily_calories <- read.csv("dailyCalories_merged.csv")
+sleep_day <- read.csv("sleepDay_merged.csv")
+daily_intensities <- read.csv("dailyIntensities_merged.csv")
+weight_log <- read.csv("weightLogInfo_merged.csv")
+
+```
+
+###  Exploring the dataframes
+
+### 1. Exploring Daily_activity
+
+```
+ head(daily_activity)
+ ```
+ ```
+          Id ActivityDate TotalSteps TotalDistance TrackerDistance
+1 1503960366    4/12/2016      13162          8.50            8.50
+2 1503960366    4/13/2016      10735          6.97            6.97
+3 1503960366    4/14/2016      10460          6.74            6.74
+4 1503960366    4/15/2016       9762          6.28            6.28
+5 1503960366    4/16/2016      12669          8.16            8.16
+6 1503960366    4/17/2016       9705          6.48            6.48
+LoggedActivitiesDistance VeryActiveDistance ModeratelyActiveDistance
+1                        0               1.88                     0.55
+2                        0               1.57                     0.69
+3                        0               2.44                     0.40
+4                        0               2.14                     1.26
+5                        0               2.71                     0.41
+6                        0               3.19                     0.78
+  LightActiveDistance SedentaryActiveDistance VeryActiveMinutes
+1                6.06                       0                25
+2                4.71                       0                21
+3                3.91                       0                30
+4                2.83                       0                29
+5                5.04                       0                36
+6                2.51                       0                38
+  FairlyActiveMinutes LightlyActiveMinutes SedentaryMinutes Calories
+1                  13                  328              728     1985
+2                  19                  217              776     1797
+3                  11                  181             1218     1776
+4                  34                  209              726     1745
+5                  10                  221              773     1863
+6                  20                  164              539     1728
+```
+```
+ colnames(daily_activity)
+```
+```
+
+ [1] "Id"                       "ActivityDate"            
+ [3] "TotalSteps"               "TotalDistance"           
+ [5] "TrackerDistance"          "LoggedActivitiesDistance"
+ [7] "VeryActiveDistance"       "ModeratelyActiveDistance"
+ [9] "LightActiveDistance"      "SedentaryActiveDistance" 
+[11] "VeryActiveMinutes"        "FairlyActiveMinutes"     
+[13] "LightlyActiveMinutes"     "SedentaryMinutes"        
+[15] "Calories"
+
+```
+
+```
+ glimpse(daily_activity)
+```
+
+```
+Rows: 940
+Columns: 15
+$ Id                       <dbl> 1503960366, 1503960366, 1503960366, 1503960~
+$ ActivityDate             <chr> "4/12/2016", "4/13/2016", "4/14/2016", "4/1~
+$ TotalSteps               <int> 13162, 10735, 10460, 9762, 12669, 9705, 130~
+$ TotalDistance            <dbl> 8.50, 6.97, 6.74, 6.28, 8.16, 6.48, 8.59, 9~
+$ TrackerDistance          <dbl> 8.50, 6.97, 6.74, 6.28, 8.16, 6.48, 8.59, 9~
+$ LoggedActivitiesDistance <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+$ VeryActiveDistance       <dbl> 1.88, 1.57, 2.44, 2.14, 2.71, 3.19, 3.25, 3~
+$ ModeratelyActiveDistance <dbl> 0.55, 0.69, 0.40, 1.26, 0.41, 0.78, 0.64, 1~
+$ LightActiveDistance      <dbl> 6.06, 4.71, 3.91, 2.83, 5.04, 2.51, 4.71, 5~
+$ SedentaryActiveDistance  <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+$ VeryActiveMinutes        <int> 25, 21, 30, 29, 36, 38, 42, 50, 28, 19, 66,~
+$ FairlyActiveMinutes      <int> 13, 19, 11, 34, 10, 20, 16, 31, 12, 8, 27, ~
+$ LightlyActiveMinutes     <int> 328, 217, 181, 209, 221, 164, 233, 264, 205~
+$ SedentaryMinutes         <int> 728, 776, 1218, 726, 773, 539, 1149, 775, 8~
+$ Calories                 <int> 1985, 1797, 1776, 1745, 1863, 1728, 1921, 2~
+> ```
+
+```
+### 2. Exploring daily_calories
+```
+head(daily_calories)
+
+```
+```
+          Id ActivityDay Calories
+1 1503960366   4/12/2016     1985
+2 1503960366   4/13/2016     1797
+3 1503960366   4/14/2016     1776
+4 1503960366   4/15/2016     1745
+5 1503960366   4/16/2016     1863
+6 1503960366   4/17/2016     1728
+
+```
+ ``` colnames(daily_calories)
+ ```
+
+```
+[1] "Id"          "ActivityDay" "Calories" 
+
+```
+
+```
+glimpse(daily_calories)
+```
+
+```
+Rows: 940
+Columns: 3
+$ Id          <dbl> 1503960366, 1503960366, 1503960366, 1503960366, 15039603~
+$ ActivityDay <chr> "4/12/2016", "4/13/2016", "4/14/2016", "4/15/2016", "4/1~
+$ Calories    <int> 1985, 1797, 1776, 1745, 1863, 1728, 1921, 2035, 1786, 17~
+```
+
+
+### 3.Exploring sleep_day
+
+```
+head(sleep_day)
+
+```
+
+```
+
+          Id              SleepDay TotalSleepRecords TotalMinutesAsleep
+1 1503960366 4/12/2016 12:00:00 AM                 1                327
+2 1503960366 4/13/2016 12:00:00 AM                 2                384
+3 1503960366 4/15/2016 12:00:00 AM                 1                412
+4 1503960366 4/16/2016 12:00:00 AM                 2                340
+5 1503960366 4/17/2016 12:00:00 AM                 1                700
+6 1503960366 4/19/2016 12:00:00 AM                 1                304
+  TotalTimeInBed
+1            346
+2            407
+3            442
+4            367
+5            712
+6            320
+
+```
+
+
+```
+ colnames(sleep_day)
+ 
+```
+```
+[1] "Id"                 "SleepDay"           "TotalSleepRecords" 
+[4] "TotalMinutesAsleep" "TotalTimeInBed" 
+
+```
+
+```
+ glimpse(sleep_day)
+ 
+ ```
+ ```
+Rows: 413
+Columns: 5
+$ Id                 <dbl> 1503960366, 1503960366, 1503960366, 1503960366, 1~
+$ SleepDay           <chr> "4/12/2016 12:00:00 AM", "4/13/2016 12:00:00 AM",~
+$ TotalSleepRecords  <int> 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1~
+$ TotalMinutesAsleep <int> 327, 384, 412, 340, 700, 304, 360, 325, 361, 430,~
+$ TotalTimeInBed     <int> 346, 407, 442, 367, 712, 320, 377, 364, 384, 449,~
+```
+
+
+
+
+### 4.Exploring daily_intensities
+
+```
+
+head(daily_intensities)
+
+
+```
+
+
+```
+
+          Id ActivityDay SedentaryMinutes LightlyActiveMinutes
+1 1503960366   4/12/2016              728                  328
+2 1503960366   4/13/2016              776                  217
+3 1503960366   4/14/2016             1218                  181
+4 1503960366   4/15/2016              726                  209
+5 1503960366   4/16/2016              773                  221
+6 1503960366   4/17/2016              539                  164
+  FairlyActiveMinutes VeryActiveMinutes SedentaryActiveDistance
+1                  13                25                       0
+2                  19                21                       0
+3                  11                30                       0
+4                  34                29                       0
+5                  10                36                       0
+6                  20                38                       0
+  LightActiveDistance ModeratelyActiveDistance VeryActiveDistance
+1                6.06                     0.55               1.88
+2                4.71                     0.69               1.57
+3                3.91                     0.40               2.44
+4                2.83                     1.26               2.14
+5                5.04                     0.41               2.71
+6                2.51                     0.78               3.19
+
+```
+
+```
+ colnames(daily_intensities)
+ 
+ ```
+ ```
+ [1] "Id"                       "ActivityDay"             
+ [3] "SedentaryMinutes"         "LightlyActiveMinutes"    
+ [5] "FairlyActiveMinutes"      "VeryActiveMinutes"       
+ [7] "SedentaryActiveDistance"  "LightActiveDistance"     
+ [9] "ModeratelyActiveDistance" "VeryActiveDistance"      
+
+```
+
+```
+ glimpse(daily_intensities)
+ ```
+ ```
+Rows: 940
+Columns: 10
+$ Id                       <dbl> 1503960366, 1503960366, 1503960366, 1503960~
+$ ActivityDay              <chr> "4/12/2016", "4/13/2016", "4/14/2016", "4/1~
+$ SedentaryMinutes         <int> 728, 776, 1218, 726, 773, 539, 1149, 775, 8~
+$ LightlyActiveMinutes     <int> 328, 217, 181, 209, 221, 164, 233, 264, 205~
+$ FairlyActiveMinutes      <int> 13, 19, 11, 34, 10, 20, 16, 31, 12, 8, 27, ~
+$ VeryActiveMinutes        <int> 25, 21, 30, 29, 36, 38, 42, 50, 28, 19, 66,~
+$ SedentaryActiveDistance  <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+$ LightActiveDistance      <dbl> 6.06, 4.71, 3.91, 2.83, 5.04, 2.51, 4.71, 5~
+$ ModeratelyActiveDistance <dbl> 0.55, 0.69, 0.40, 1.26, 0.41, 0.78, 0.64, 1~
+$ VeryActiveDistance       <dbl> 1.88, 1.57, 2.44, 2.14, 2.71, 3.19, 3.25, 3~
+```
+###  Checking the number of unique participants
+
+```
+>n_distinct(daily_activity$Id)
+[1] 33
+>n_distinct(sleep_day$Id)
+[1] 24
+
+```
+
+
+###  Cleaning daily_activity dataframe
+
+```
+new_daily_activity <- daily_activity %>%
+  distinct() %>% 
+  mutate(ActivityDate=mdy(ActivityDate)) %>% 
+  mutate(TotalActiveTime = VeryActiveMinutes+FairlyActiveMinutes+LightlyActiveMinutes) %>% ###  To calculate Total Active Time
+  group_by(Id,ActivityDate)
+head(new_daily_activity)
+
+```
+```
+###  A tibble: 6 x 16
+###  Groups:   Id, ActivityDate [6]
+          Id ActivityDate TotalSteps TotalDistance TrackerDistance
+       <dbl> <date>            <int>         <dbl>           <dbl>
+1 1503960366 2016-04-12        13162          8.5             8.5 
+2 1503960366 2016-04-13        10735          6.97            6.97
+3 1503960366 2016-04-14        10460          6.74            6.74
+4 1503960366 2016-04-15         9762          6.28            6.28
+5 1503960366 2016-04-16        12669          8.16            8.16
+6 1503960366 2016-04-17         9705          6.48            6.48
+###  ... with 11 more variables: LoggedActivitiesDistance <dbl>,
+###    VeryActiveDistance <dbl>, ModeratelyActiveDistance <dbl>,
+###    LightActiveDistance <dbl>, SedentaryActiveDistance <dbl>,
+###    VeryActiveMinutes <int>, FairlyActiveMinutes <int>,
+###    LightlyActiveMinutes <int>, SedentaryMinutes <int>, Calories <int>,
+###    TotalActiveTime <int>
+```
+
+###  Cleaning & transforming sleep_day datatset
+
+```
+new_sleep_day <- sleep_day %>%
+  distinct() %>% 
+  mutate(SleepDay=mdy_hms(SleepDay)) %>% 
+  group_by(Id)
+head(new_sleep_day)
+
+```
+
+```
+###  A tibble: 6 x 5
+###  Groups:   Id [1]
+       Id SleepDay            TotalSleepRecor~ TotalMinutesAsl~ TotalTimeInBed
+    <dbl> <dttm>                         <int>            <int>          <int>
+1  1.50e9 2016-04-12 00:00:00                1              327            346
+2  1.50e9 2016-04-13 00:00:00                2              384            407
+3  1.50e9 2016-04-15 00:00:00                1              412            442
+4  1.50e9 2016-04-16 00:00:00                2              340            367
+5  1.50e9 2016-04-17 00:00:00                1              700            712
+6  1.50e9 2016-04-19 00:00:00                1              304            320
+
+```
+
+
+## **4. Analyze and Share Phase**
+
+#### Exploring relationships in the new_daily_activty dataframe
+
+
+
+####  Calculating the Averages
+```
+avg_very_active_min <- mean(new_daily_activity$VeryActiveMinutes)
+avg_fairly_active_min <- mean(new_daily_activity$FairlyActiveMinutes)
+avg_ligthly_active_min <- mean(new_daily_activity$LightlyActiveMinutes)
+avg_sedentary_min  <- mean(new_daily_activity$SedentaryMinutes)
+```
+###  Creating a new dataframe to make a plot
+```
+ave_min_df <- data.frame(activity= c("Very Active", "Fairly Active", "Lightly Active", "Sedentary"), minutes= c(avg_very_active_min,avg_fairly_active_min,avg_ligthly_active_min,avg_sedentary_min))
+```
+
+###  Rounding the minutes to integers
+```
+new_ave_min_df <- ave_min_df %>% 
+  mutate_if(is.numeric, round, digits = 0)
+```
+###  Plotting a bar graph
+
+```
+ggplot(data=new_ave_min_df,aes(x=reorder(activity, minutes), y=minutes, fill=activity) ) +
+  geom_bar(stat = 'identity')+
+  labs(title= "Activity Intensity", x="Activity",y="Average Minutes")+
+  geom_text(aes(label = minutes), vjust = 0)
+  
+```
+
+
+
+![PLOT 1.](ActivityIntensity.png)
+
+
+
+###  Finding the correlation between TotalActive Time and TotalSteps
+
+```
+cor.test(new_daily_activity$TotalActiveTime,new_daily_activity$TotalSteps)
+
+```
+```
+Pearson's product-moment correlation
+
+data:  new_daily_activity$TotalActiveTime and new_daily_activity$TotalSteps
+t = 37.249, df = 938, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.7452981 0.7970065
+sample estimates:
+      cor 
+0.7724293 
+```
+
+###  Plotting the relationship between TotalActive Time vs TotalSteps
+
+```
+ggplot(data=new_daily_activity, aes(x=TotalSteps, y=TotalActiveTime)) + 
+  labs(title = "Total Active Time over Total Steps ")+
+  geom_point()+
+  geom_smooth(method='lm')+
+  annotate ("text", x=20000, y=700, label="R =  0.772")
+```
+
+![PLOT 2.](PLOT2.png)
+
+
+### Exploring relationships in the new_sleep_day dataframe
+
+### Exploring sleep records
+
+###  Categorising the hours of sleep
+
+```
+new_sleep_day <- mutate(new_sleep_day, sleep_adequacy = case_when(
+  TotalMinutesAsleep < 300 ~ "Less than 5hr",
+  TotalMinutesAsleep >=300 & TotalMinutesAsleep < 420 ~ "5 to 7hr",
+  TotalMinutesAsleep >= 420 & TotalMinutesAsleep < 540 ~ "7 to 9hr",
+  TotalMinutesAsleep > 540 ~ "More than 9hr"))
+head(new_sleep_day)
+
+```
+```
+
+###  A tibble: 6 x 6
+###  Groups:   Id [1]
+       Id SleepDay            TotalSleepRecor~ TotalMinutesAsl~ TotalTimeInBed
+    <dbl> <dttm>                         <int>            <int>          <int>
+1  1.50e9 2016-04-12 00:00:00                1              327            346
+2  1.50e9 2016-04-13 00:00:00                2              384            407
+3  1.50e9 2016-04-15 00:00:00                1              412            442
+4  1.50e9 2016-04-16 00:00:00                2              340            367
+5  1.50e9 2016-04-17 00:00:00                1              700            712
+6  1.50e9 2016-04-19 00:00:00                1              304            320
+###  ... with 1 more variable: sleep_adequacy <chr>
+
+```
+###  Plotting Sleep Adequacy
+```
+new_sleep_day$sleep_adequacy = factor(new_sleep_day$sleep_adequacy, levels = c('Less than 5hr', '5 to 7hr', '7 to 9hr','More than 9hr')) 
+ggplot(data=new_sleep_day,aes(x=sleep_adequacy),fill=sleep_adequacy)+
+   geom_bar()+
+  labs(title= "Sleep Adequacy", x="Sleep adequacy",y="Count")
+
+```
+
+![PLOT 3.](PLOT3.png)
+
+
+### Finding the correlation between TotalMinutesAsleep and TotalTimeInBed
+
+```
+cor.test(new_sleep_day$TotalTimeInBed,new_sleep_day$TotalMinutesAsleep)
+
+```
+```
+Pearson's product-moment correlation
+
+data:  new_sleep_day$TotalTimeInBed and new_sleep_day$TotalMinutesAsleep
+t = 51.28, df = 408, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.9161262 0.9423551
+sample estimates:
+      cor 
+0.9304224 
+
+```
+### Plotting TotalMinutesAsleep vs TotalTimeInBed
+
+```
+ggplot(data=new_sleep_day, aes(x=TotalTimeInBed, y=TotalMinutesAsleep)) + 
+  labs(title = "Total Minutes Asleep vs Total Time in Bed")+
+  geom_point()+
+  geom_smooth(method='lm')+
+  annotate ("text", x=200, y=750, label="R =  0.930")
+``` 
+![PLOT 4.](PLOT4.png)
+  
+### Exploring relationships between new_daily_activity and new_sleep_record dataframe
+
+### Combining the dataframes
+
+
+```
+combined_data <-
+  left_join(new_daily_activity,new_sleep_day, by= c("Id"="Id", "ActivityDate"="SleepDay"))
+head(combined_data)
+
+```
+```
+###  A tibble: 6 x 20
+###  Groups:   Id, ActivityDate [6]
+          Id ActivityDate        TotalSteps TotalDistance TrackerDistance
+       <dbl> <dttm>                   <int>         <dbl>           <dbl>
+1 1503960366 2016-04-12 00:00:00      13162          8.5             8.5 
+2 1503960366 2016-04-13 00:00:00      10735          6.97            6.97
+3 1503960366 2016-04-14 00:00:00      10460          6.74            6.74
+4 1503960366 2016-04-15 00:00:00       9762          6.28            6.28
+5 1503960366 2016-04-16 00:00:00      12669          8.16            8.16
+6 1503960366 2016-04-17 00:00:00       9705          6.48            6.48
+###  ... with 15 more variables: LoggedActivitiesDistance <dbl>,
+###    VeryActiveDistance <dbl>, ModeratelyActiveDistance <dbl>,
+###    LightActiveDistance <dbl>, SedentaryActiveDistance <dbl>,
+###    VeryActiveMinutes <int>, FairlyActiveMinutes <int>,
+###    LightlyActiveMinutes <int>, SedentaryMinutes <int>, Calories <int>,
+###    TotalActiveTime <int>, TotalSleepRecords <int>, TotalMinutesAsleep <int>,
+###    TotalTimeInBed <int>, sleep_adequacy <fct>
+```
+
+### Exploring relationships between SedentaryMinutes and sleep_adequacy
+
+###  Plotting boxplot between Sleep Adequacy and Sedentary Minutes
+
+
+```
+combined_data %>%
+  filter(!is.na(sleep_adequacy)) %>% 
+ggplot(aes(x=sleep_adequacy,y=SedentaryMinutes,fill=sleep_adequacy)) +
+  geom_boxplot()+
+  scale_x_discrete(limits=c("Less than 5hr", "5 to 7hr", "7 to 9hr","More than 9hr"))+
+    stat_summary(geom="text", fun=mean,
+           aes(label=sprintf("%1.1f", ..y..)),
+           position=position_nudge(x=0.5), size=2)
+           
+```
+![PLOT 5.](PLOT5.png)
+
+###  Creating a dataframe of averages
+
+```
+avg_combined_data <- combined_data %>% 
+group_by(Id) %>% 
+drop_na() %>% 
+summarise(avg_total_active=mean(TotalActiveTime),avg_sedentary= mean(SedentaryMinutes),avg_total_minutes_asleep=mean(TotalMinutesAsleep),avg_time_in_bed=mean(TotalTimeInBed) )
+avg_combined_data
+```
+```
+
+###  A tibble: 24 x 5
+           Id avg_total_active avg_sedentary avg_total_minute~ avg_time_in_bed
+        <dbl>            <dbl>         <dbl>             <dbl>           <dbl>
+ 1 1503960366             291.          759.              360.            383.
+ 2 1644430081             263.          920.              294             346 
+ 3 1844505072             147.          443.              652             961 
+ 4 1927972279              85           977.              417             438.
+ 5 2026352035             257.          654.              506.            538.
+ 6 2320127002             242          1129                61              69 
+ 7 2347167796             271.          628.              447.            491.
+ 8 3977333714             263.          716.              294.            461.
+ 9 4020332650             249           842.              349.            380.
+10 4319703577             259.          643.              477.            502.
+###  ... with 14 more rows
+```
+###  Finding Correlation
+
+```
+cor.test(avg_combined_data$avg_sedentary,avg_combined_data$avg_total_minutes_asleep)
+```
+```
+	Pearson's product-moment correlation
+
+data:  avg_combined_data$avg_sedentary and avg_combined_data$avg_total_minutes_asleep
+t = -8.8868, df = 22, p-value = 9.875e-09
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.9491575 -0.7477410
+sample estimates:
+       cor 
+-0.8843774 
+```
+
+
+## **5. Act Phase :**
+
+
+ **Observations :**
+
+
+
+
+1.  From the given plot 1 we can conclude that the number of fairly active people is the least at 14 whereas the number of people sedentary is the highest at 991.
+the people who are very active and lightly active are in the between.
+The correlation stands out at 0.77.
+
+
+2. From the plot 2 we can conclude that the maximum number of people can take a total number of steps of around 10000 as the number of steps increase and the number of activity times decrease as hence there are hardly a very few people who are around 30,000 steps.
+R=0.72
+
+3. From plot three we can conclude that the maximum number of people sleep from 729 hours and the least number of people sleep for more than 9 hours whereas there is a considerable amount of people who sleep less than 5 hours and 5 to 7 hours.
+
+The correlation stands out at 0.93.
+
+4. From plot 4 we can conclude that the graph moves in a directly proportional manner. People tend to be asleep during the time when they are in bed. R=0.93
+
+5. From plot five we can conclude that the level of sleep adequacy is maximum for 5 hours and least after around 9 hours.  we can see that  the sleep adequacy tends to decrease after 5 hours of sleep.
+The correlation stands out at -0.88
+
+
+**Recommendations  :**
+
+In the era of technology,it's generally seen that whenever a product becomes versatile which can be used for multiple purposes it tends to attract more buyers as it also looks attractive then its existing competitors.  
+
+To make the product more versatile several things can be added to it:
+
+**1. Heart rate monitor to monitor the heart rate of all the users.**
+
+**2. Calorie tracker to track  the calories burnt while walking**
+
+**3. Alarm for the user to set goals and routines accordingly to maintain fitness.**
+
+**4. Some Targets can be placed for users with Levels of challenges like Level 1,Level2,Level3 and so on, then giving scores will motivate users to be in activities more.**
+
+
+
+
